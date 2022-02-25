@@ -1,0 +1,124 @@
+Before we clone the repository first do fork in your repository. So go to github to that repository and click on "Fork".
+
+First we clone this repository
+"git clone https://github.com/saha-rajdeep/eks-demos.git"
+
+After clone first we check which branch is created
+"git branch"
+
+This master branch has all the codes and changes from the remote master branch. Let's run 
+"git log --oneline"
+
+Here besides our local master branch we see couple of other branches.
+d2316eb (HEAD -> master, origin/master, origin/HEAD) Create README.md
+
+So whenever you clone a repository git create remote tracking branches in your local folder. To see those branches
+"git branch -r"
+
+or if you see all the branches in one go run
+"git branch --all"
+
+This command show all the local branches as well as remote tracking branches. This branch
+remotes/origin/HEAD -> origin/master
+
+means the master branch in the remote repository is the default branch where the remote "HEAD" sitting at.
+
+If you want to know what is the remote github url that these branches are tracking too. You can run
+"git remote -v"
+
+origin  https://github.com/saha-rajdeep/eks-demos.git (fetch)
+origin  https://github.com/saha-rajdeep/eks-demos.git (push)
+
+This shows the url that the origin is map to and this is the url that's going to used for "fetch" and "push".
+
+If you log the git log output again eveything is pointing to the latest commit and we haven't done any changes in local.
+
+Note: Even if there is any changes happen in the remote repository this log is not going to get updated. This is just a one time snapshot. Their is no continues replication between the remote repository and local repository. Unless you explicitly bringing the changes from remote to local.
+
+Let's change some in our local repository. So we create this file 
+"code install_grafana.txt"
+
+and save this file and add and commit
+git add .
+git commit -m "updated grafana instruction"
+
+now we run 
+"git log --oneline" 
+
+69a5e65 (HEAD -> master) updated grafana instruction
+d2316eb (origin/master, origin/HEAD) Create README.md
+ecf355e (origin/release_01.22) EKS Calico Network Policy Demo
+f979b3e Changed container image repo from private to public
+54d3e49 Added files for eks demos
+
+again. So at this point the local master went one commit ahead then our remote tracking branches. So let's check our remote repository as well.
+
+So for this I do make some change in README.MD file. And now remote repository is out of sync with the local repository. Now to bringing those changes. You run 
+"git fetch origin" 
+
+Now if run this command again
+"git log --oneline"
+
+d15cfc3 (HEAD -> master) Update README.md
+d2316eb Create README.md
+ecf355e (origin/release_01.22) EKS Calico Network Policy Demo
+f979b3e Changed container image repo from private to public
+54d3e49 Added files for eks demos
+
+Now note that it is not showing our "origin master" branch because the branch has diverge. They are not longer in the same parent straight line relatinoship.
+
+origin/release_01.22 - is still looking at the parent commit follower current local master branch but the remote tracking master branch has diverge to a new commit. To see all the logs in one go
+"git log --oneline --all"
+
+d3c3bb2 (origin/master, origin/HEAD) Update README.md
+d15cfc3 (HEAD -> master) Update README.md
+d2316eb Create README.md
+ecf355e (origin/release_01.22) EKS Calico Network Policy Demo
+f979b3e Changed container image repo from private to public
+54d3e49 Added files for eks demos
+:...skipping...
+d3c3bb2 (origin/master, origin/HEAD) Update README.md        
+d15cfc3 (HEAD -> master) Update README.md
+d2316eb Create README.md
+ecf355e (origin/release_01.22) EKS Calico Network Policy Demo
+f979b3e Changed container image repo from private to public  
+54d3e49 Added files for eks demos
+
+And now it showing that our "origin/master, origin/HEAD remote " tracking branches are looking at this 
+d3c3bb2 (origin/master, origin/HEAD) Update README.md  
+
+commit but as the local "master" is looking at this commit
+d15cfc3 (HEAD -> master) Update README.md
+
+and the
+ecf355e (origin/release_01.22) 
+
+is looking at this commit. And note that you cannot switch this remote tracking branches
+"git switch origin/master"
+
+fatal: a branch is expected, got remote branch 'origin/master'
+
+but all the changes from those remote repositories is sitting in that remote tracking branch. So you can merge the changes from this remote tracking branch to your master branch. so currently Iam sitting at the "master" branch denoted by the 'HEAD" pointing to the "master". So I simply run this command
+"git merge origin/master"
+
+This will be a '3 way merge' and a new commit ID should appear.
+
+Updating d15cfc3..d3c3bb2
+Fast-forward
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Let's run
+"git log --oneline --all"
+
+d3c3bb2 (HEAD -> master, origin/master, origin/HEAD) Update README.md
+d15cfc3 Update README.md
+d2316eb Create README.md
+ecf355e (origin/release_01.22) EKS Calico Network Policy Demo
+f979b3e Changed container image repo from private to public
+54d3e49 Added files for eks demos
+
+as per '3 way merge' a new commit ID appeared and now our local "Master" branch has the changes from the remote repository. Instead of running the "fetch" or "merge". I can have just run the 
+"git pull" 
+
+command in one go
